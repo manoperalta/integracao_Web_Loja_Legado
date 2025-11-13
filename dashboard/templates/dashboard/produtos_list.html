@@ -1,0 +1,293 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard - Produtos{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-box me-2"></i>
+    Gerenciar Produtos
+{% endblock %}
+
+{% block page_actions %}
+    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#importarFtpModal">
+        <i class="fas fa-download me-2"></i>
+        Importar FTP
+    </button>
+    <a href="{% url 'dashboard:produto_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>
+        Novo Produto
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="card-title mb-0">Lista de Produtos</h5>
+                </div>
+                <div class="col-auto">
+                    <form method="GET" class="d-flex">
+                        <input type="text" name="search" class="form-control me-2" 
+                               placeholder="Buscar produtos..." value="{{ search }}">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">Imagem</th>
+                                <th>Nome</th>
+                                <th>Referência</th>
+                                <th>Preço</th>
+                                <th>Medida</th>
+                                <th>Estoque</th>
+                                <th>Criado por</th>
+                                <th>Data</th>
+                                <th style="width: 150px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produto in page_obj %}
+                            <tr>
+                                <td>
+                                    {% if produto.imagem %}
+                                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" 
+                                             class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 60px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ produto.nome }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ produto.descricao|truncatewords:8 }}</small>
+                                </td>
+                                <td>{{ produto.ref }}</td>
+                                <td><strong>R$ {{ produto.valor|floatformat:2 }}</strong></td>
+                                <td>{{ produto.valor_da_medida|floatformat:2 }} {{ produto.get_unidade_de_medida_display }}</td>
+                                <td>
+                                    {% if produto.quantidade <= 5 %}
+                                        <span class="badge bg-danger">{{ produto.quantidade }}</span>
+                                    {% elif produto.quantidade <= 10 %}
+                                        <span class="badge bg-warning">{{ produto.quantidade }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ produto.quantidade }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ produto.usuario.username }}</td>
+                                <td>{{ produto.data_criacao|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'dashboard:produto_update' produto.id %}" 
+                                           class="btn btn-sm btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'dashboard:produto_delete' produto.id %}" 
+                                           class="btn btn-sm btn-outline-danger" title="Deletar">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum produto encontrado</h5>
+                    {% if search %}
+                        <p class="text-muted">Tente uma busca diferente ou 
+                            <a href="{% url 'dashboard:produtos_list' %}">veja todos os produtos</a>
+                        </p>
+                    {% else %}
+                        <p class="text-muted">Comece criando seu primeiro produto!</p>
+                        <a href="{% url 'dashboard:produto_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Criar Primeiro Produto
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de Importação FTP -->
+    <div class="modal fade" id="importarFtpModal" tabindex="-1" aria-labelledby="importarFtpModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importarFtpModalLabel">
+                        <i class="fas fa-download me-2"></i>
+                        Importar Produtos via FTP
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formImportarFtp">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="ftp_host" class="form-label">Servidor FTP</label>
+                            <input type="text" class="form-control" id="ftp_host" name="ftp_host" 
+                                   placeholder="ex: ftp.exemplo.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftp_user" class="form-label">Usuário</label>
+                            <input type="text" class="form-control" id="ftp_user" name="ftp_user" 
+                                   placeholder="Usuário FTP" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftp_pass" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="ftp_pass" name="ftp_pass" 
+                                   placeholder="Senha FTP" required>
+                        </div>
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                O arquivo <strong>produtos.txt</strong> será lido da pasta <strong>1</strong> no servidor FTP.
+                            </small>
+                        </div>
+                    </form>
+                    <div id="importResult" class="mt-3" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="btnImportar">
+                        <i class="fas fa-download me-2"></i>
+                        Importar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('btnImportar').addEventListener('click', function() {
+    const btn = this;
+    const form = document.getElementById('formImportarFtp');
+    const resultDiv = document.getElementById('importResult');
+    
+    // Validar formulário
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Desabilitar botão e mostrar loading
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Importando...';
+    resultDiv.style.display = 'none';
+    
+    // Preparar dados
+    const formData = new FormData(form);
+    
+    // Enviar requisição
+    fetch('{% url "dashboard:importar_produtos_ftp" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            resultDiv.className = 'alert alert-success';
+            resultDiv.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Importação concluída!</strong><br>
+                <small>
+                    Produtos criados: ${data.produtos_criados}<br>
+                    Produtos atualizados: ${data.produtos_atualizados}
+                    ${data.erros && data.erros.length > 0 ? '<br>Erros: ' + data.erros.length : ''}
+                </small>
+            `;
+            
+            // Recarregar página após 2 segundos
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            resultDiv.className = 'alert alert-danger';
+            resultDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Erro na importação:</strong><br>
+                <small>${data.error}</small>
+            `;
+        }
+        resultDiv.style.display = 'block';
+    })
+    .catch(error => {
+        resultDiv.className = 'alert alert-danger';
+        resultDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Erro:</strong> ${error.message}
+        `;
+        resultDiv.style.display = 'block';
+    })
+    .finally(() => {
+        // Reabilitar botão
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-download me-2"></i>Importar';
+    });
+});
+</script>
+{% endblock %}

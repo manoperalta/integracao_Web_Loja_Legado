@@ -1,0 +1,21 @@
+Detalhes do Pedido #12
+Data do Pedido: 2025-10-09 02:44:42.338263+00:00
+Cliente: x
+Status do Pagamento: pago
+Transaction ID: 1759978206.818917
+
+Produtos:
+  - ID: 1
+    Nome: Gold Standard 100% Whey Chocolate 907g - Optimum Nutrition, 907g - Optimum Nutrition
+    Descrição: Informação Nutricional 100% Whey Protein Gold Standard (909g) - Optimum Nutrition Porção de 31g (1 scoop)Quantidade por porção%VD(*)Calorias 123 Kcal = 513kj6CarboidratosAçúcares4,0g1,0g1--Proteínas24g32Gorduras Totais1,5g3Gordura Saturada0,5g2Gorduras Trans0,0g--Fibra0,0g25Sódio100mg4* % Valores Diários com base em uma dieta de 2.000Kcal ou 8400kJ. Seus valores diários podem ser maiores ou menores dependendo das suas necessidades energéticas. Obs: Pode haver pequenas variações
+    Quantidade: 1
+    Preço Unitário: R$229.90
+    Total do Item: R$229.90
+  - ID: 2
+    Nome: Creatina Creapure
+    Descrição: A vantagem para quem compra é a de encontrar uma fabricante brasileira que vende direto para o consumidor.
+    Quantidade: 1
+    Preço Unitário: R$89.90
+    Total do Item: R$89.90
+
+Total do Pedido: R$319.80

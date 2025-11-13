@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="mb-0">Editar Produto</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="formProduto">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_nome" class="form-label fw-bold">Nome do Produto *</label>
+                                    {{ form.nome }}
+                                    {% if form.nome.errors %}
+                                        <div class="text-danger small">{{ form.nome.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_ref" class="form-label">Referência</label>
+                                    {{ form.ref }}
+                                    {% if form.ref.errors %}
+                                        <div class="text-danger small">{{ form.ref.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_descricao" class="form-label">Descrição</label>
+                            {{ form.descricao }}
+                            {% if form.descricao.errors %}
+                                <div class="text-danger small">{{ form.descricao.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_quantidade" class="form-label fw-bold">Quantidade *</label>
+                                    {{ form.quantidade }}
+                                    {% if form.quantidade.errors %}
+                                        <div class="text-danger small">{{ form.quantidade.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_unidade_de_medida" class="form-label fw-bold">Unidade de Medida *</label>
+                                    {{ form.unidade_de_medida }}
+                                    {% if form.unidade_de_medida.errors %}
+                                        <div class="text-danger small">{{ form.unidade_de_medida.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="id_valor" class="form-label fw-bold">Valor (R$) *</label>
+                                    {{ form.valor }}
+                                    {% if form.valor.errors %}
+                                        <div class="text-danger small">{{ form.valor.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_categoria" class="form-label fw-bold">Categoria</label>
+                                    <div class="input-group">
+                                        {{ form.categoria }}
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalNovaCategoria">
+                                            <i class="bi bi-plus-circle"></i> Nova
+                                        </button>
+                                    </div>
+                                    {% if form.categoria.errors %}
+                                        <div class="text-danger small">{{ form.categoria.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_imagem" class="form-label">Imagem do Produto</label>
+                                    {{ form.imagem }}
+                                    {% if form.imagem.errors %}
+                                        <div class="text-danger small">{{ form.imagem.errors }}</div>
+                                    {% endif %}
+                                    {% if form.instance.imagem %}
+                                        <div class="mt-2">
+                                            <small class="text-muted">Imagem atual:</small><br>
+                                            <img src="{{ form.instance.imagem.url }}" alt="Imagem do produto" class="img-thumbnail mt-1" style="max-width: 150px;">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg text-dark">
+                                <i class="bi bi-save"></i> Salvar Alterações
+                            </button>
+                            <a href="{% url 'lista_produtos' %}" class="btn btn-secondary btn-lg">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para criar nova categoria -->
+<div class="modal fade" id="modalNovaCategoria" tabindex="-1" aria-labelledby="modalNovaCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNovaCategoriaLabel">Nova Categoria</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNovaCategoria">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="nomeCategoria" class="form-label">Nome da Categoria</label>
+                        <input type="text" class="form-control" id="nomeCategoria" name="nome" placeholder="Digite o nome da categoria" required>
+                    </div>
+                    <div id="mensagemErro" class="alert alert-danger d-none"></div>
+                    <div id="mensagemSucesso" class="alert alert-success d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnSalvarCategoria">Salvar Categoria</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnSalvar = document.getElementById('btnSalvarCategoria');
+    const inputNome = document.getElementById('nomeCategoria');
+    const mensagemErro = document.getElementById('mensagemErro');
+    const mensagemSucesso = document.getElementById('mensagemSucesso');
+    const selectCategoria = document.getElementById('id_categoria');
+    
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', function() {
+            const nome = inputNome.value.trim();
+            
+            if (!nome) {
+                mensagemErro.textContent = 'Por favor, digite o nome da categoria.';
+                mensagemErro.classList.remove('d-none');
+                return;
+            }
+            
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            fetch('{% url "criar_categoria_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ nome: nome })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const option = new Option(data.categoria.nome, data.categoria.id, true, true);
+                    selectCategoria.add(option);
+                    
+                    mensagemSucesso.textContent = 'Categoria criada com sucesso!';
+                    mensagemSucesso.classList.remove('d-none');
+                    mensagemErro.classList.add('d-none');
+                    
+                    inputNome.value = '';
+                    
+                    setTimeout(function() {
+                        const modalElement = document.getElementById('modalNovaCategoria');
+                        const modal = bootstrap.Modal.getInstance(modalElement);
+                        if (modal) {
+                            modal.hide();
+                        }
+                        mensagemSucesso.classList.add('d-none');
+                    }, 1000);
+                } else {
+                    mensagemErro.textContent = data.error || 'Erro ao criar categoria.';
+                    mensagemErro.classList.remove('d-none');
+                    mensagemSucesso.classList.add('d-none');
+                }
+            })
+            .catch(error => {
+                mensagemErro.textContent = 'Erro ao conectar com o servidor.';
+                mensagemErro.classList.remove('d-none');
+                mensagemSucesso.classList.add('d-none');
+            });
+        });
+    }
+    
+    const modalElement = document.getElementById('modalNovaCategoria');
+    if (modalElement) {
+        modalElement.addEventListener('show.bs.modal', function() {
+            inputNome.value = '';
+            mensagemErro.classList.add('d-none');
+            mensagemSucesso.classList.add('d-none');
+        });
+    }
+});
+</script>
+{% endblock %}

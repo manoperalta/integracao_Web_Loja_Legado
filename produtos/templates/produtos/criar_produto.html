@@ -1,0 +1,81 @@
+<!-- {% extends 'base.html' %} -->
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Cadastrar Novo Produto</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            {{ form.nome.label_tag }}
+            {{ form.nome }}
+            {% if form.nome.errors %}
+                <div class="text-danger small">{{ form.nome.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.ref.label_tag }}
+            {{ form.ref }}
+            {% if form.ref.errors %}
+                <div class="text-danger small">{{ form.ref.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.descricao.label_tag }}
+            {{ form.descricao }}
+            {% if form.descricao.errors %}
+                <div class="text-danger small">{{ form.descricao.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.quantidade.label_tag }}
+            {{ form.quantidade }}
+            {% if form.quantidade.errors %}
+                <div class="text-danger small">{{ form.quantidade.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.valor.label_tag }}
+            {{ form.valor }}
+            {% if form.valor.errors %}
+                <div class="text-danger small">{{ form.valor.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Unidade de Medida -->
+        <div class="mb-3">
+            {{ form.unidade_de_medida.label_tag }}
+            {{ form.unidade_de_medida }}
+            {% if form.unidade_de_medida.errors %}
+                <div class="text-danger small">{{ form.unidade_de_medida.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Categoria -->
+        <div class="mb-3">
+            {{ form.categoria.label_tag }}
+            {{ form.categoria }}
+            {% if form.categoria.errors %}
+                <div class="text-danger small">{{ form.categoria.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.imagem.label_tag }}
+            {{ form.imagem }}
+            {% if form.imagem.errors %}
+                <div class="text-danger small">{{ form.imagem.errors }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="{% url 'lista_produtos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

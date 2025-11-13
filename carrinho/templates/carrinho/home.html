@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="text-center mb-4">Bem-vindo à Nossa Loja</h1>
+            <p class="text-center text-muted">Descubra nossos produtos incríveis com os melhores preços!</p>
+        </div>
+    </div>
+
+    {% if produtos %}
+        <div class="row">
+            {% for produto in produtos %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm product-card">
+                    <div class="position-relative">
+                        <img src="{{ produto.imagem.url }}" class="card-img-top" alt="{{ produto.nome }}" 
+                             style="height: 250px; object-fit: cover;">
+                        {% if produto.quantidade <= 5 %}
+                            <span class="badge bg-warning position-absolute top-0 end-0 m-2">
+                                Últimas {{ produto.quantidade }} unidades!
+                            </span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ produto.nome }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ produto.descricao|truncatewords:15 }}
+                        </p>
+                        <div class="mt-auto">
+                            <div class="mb-2">
+                                <small class="text-muted">{{ produto.valor_da_medida|floatformat:2 }} {{ produto.get_unidade_de_medida_display }}</small>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h4 text-success mb-0">R${{ produto.valor|floatformat:2 }}</span>
+                                <small class="text-muted">Estoque: {{ produto.quantidade }}</small>
+                            </div>
+                            <div class="d-grid gap-2">
+                                {% if produto.quantidade > 0 %}
+                                    <button data-product="{{ produto.id }}" data-action="add" 
+                                            class="btn btn-primary update-cart">
+                                        <i class="fas fa-cart-plus me-2"></i>Adicionar ao Carrinho
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-secondary" disabled>
+                                        <i class="fas fa-times me-2"></i>Fora de Estoque
+                                    </button>
+                                {% endif %}
+                                <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" 
+                                        data-bs-target="#produtoModal{{ produto.id }}">
+                                    <i class="fas fa-eye me-2"></i>Ver Detalhes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal para detalhes do produto -->
+            <div class="modal fade" id="produtoModal{{ produto.id }}" tabindex="-1" 
+                 aria-labelledby="produtoModalLabel{{ produto.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="produtoModalLabel{{ produto.id }}">{{ produto.nome }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <img src="{{ produto.imagem.url }}" class="img-fluid rounded" alt="{{ produto.nome }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <h4 class="text-success">R${{ produto.valor|floatformat:2 }}</h4>
+                                    <p><strong>Referência:</strong> {{ produto.ref }}</p>
+                                    <p><strong>Medida:</strong> {{ produto.valor_da_medida|floatformat:2 }} {{ produto.get_unidade_de_medida_display }}</p>
+                                    <p><strong>Estoque disponível:</strong> {{ produto.quantidade }} unidades</p>
+                                    <p><strong>Descrição:</strong></p>
+                                    <p>{{ produto.descricao }}</p>
+                                    <p><strong>Adicionado por:</strong> {{ produto.usuario.username }}</p>
+                                    <p><strong>Data de criação:</strong> {{ produto.data_criacao|date:"d/m/Y H:i" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            {% if produto.quantidade > 0 %}
+                                <button data-product="{{ produto.id }}" data-action="add" 
+                                        class="btn btn-primary update-cart" data-bs-dismiss="modal">
+                                    <i class="fas fa-cart-plus me-2"></i>Adicionar ao Carrinho
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Seção de informações adicionais -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Por que escolher nossa loja?</h5>
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                                <h6>Entrega Rápida</h6>
+                                <p class="text-muted">Entregamos seus produtos com agilidade e segurança.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                                <h6>Compra Segura</h6>
+                                <p class="text-muted">Seus dados estão protegidos em todas as transações.</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-headset fa-3x text-info mb-3"></i>
+                                <h6>Metha Systems</h6>
+                                <p class="text-muted">softwares personalizados com a estrutura necessária de sua empresa.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="card">
+                <div class="card-body">
+                    <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
+                    <h3 class="text-muted">Nenhum produto disponível</h3>
+                    <p class="text-muted">Em breve teremos novos produtos para você!</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Font Awesome para ícones -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+.product-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.card-img-top {
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .card-img-top {
+    transform: scale(1.05);
+}
+</style>
+{% endblock content %}

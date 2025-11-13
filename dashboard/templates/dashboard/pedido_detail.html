@@ -1,0 +1,265 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard - Pedido #{{ pedido.id }}{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-shopping-cart me-2"></i>
+    Pedido #{{ pedido.id }}
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'dashboard:pedidos_list' %}" class="btn btn-outline-secondary me-2">
+        <i class="fas fa-arrow-left me-2"></i>
+        Voltar
+    </a>
+    <a href="{% url 'dashboard:pedido_update' pedido.id %}" class="btn btn-warning">
+        <i class="fas fa-edit me-2"></i>
+        Editar
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <!-- Informações do Pedido -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Informações do Pedido
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Número do Pedido:</strong><br>
+                        <span class="h5 text-primary">#{{ pedido.id }}</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Cliente:</strong><br>
+                        {% if pedido.usuario %}
+                            <i class="fas fa-user me-1"></i>
+                            {{ pedido.usuario.username }}
+                            <br>
+                            <small class="text-muted">{{ pedido.usuario.email }}</small>
+                        {% else %}
+                            <i class="fas fa-user-slash me-1 text-muted"></i>
+                            <span class="text-muted">Cliente Anônimo</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Data do Pedido:</strong><br>
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ pedido.data_pedido|date:"d/m/Y H:i" }}
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Status:</strong><br>
+                        {% if pedido.completo %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-check me-1"></i>
+                                Finalizado
+                            </span>
+                        {% else %}
+                            <span class="badge bg-warning fs-6">
+                                <i class="fas fa-clock me-1"></i>
+                                Pendente
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Status do Pagamento:</strong><br>
+                        {% if pedido.status_pagamento == 'pago' %}
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-credit-card me-1"></i>
+                                Pago
+                            </span>
+                        {% elif pedido.status_pagamento == 'cancelado' %}
+                            <span class="badge bg-danger fs-6">
+                                <i class="fas fa-times me-1"></i>
+                                Cancelado
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary fs-6">
+                                <i class="fas fa-hourglass-half me-1"></i>
+                                Pendente
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    {% if pedido.transaction_id %}
+                        <div class="mb-3">
+                            <strong>ID da Transação:</strong><br>
+                            <code>{{ pedido.transaction_id }}</code>
+                        </div>
+                    {% endif %}
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <strong>Total de Itens:</strong><br>
+                        <span class="h6">{{ pedido.get_carrinho_itens }} itens</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Valor Total:</strong><br>
+                        <span class="h4 text-success">R$ {{ pedido.get_carrinho_total|floatformat:2 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Itens do Pedido -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Itens do Pedido
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if itens %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 80px;">Imagem</th>
+                                        <th>Produto</th>
+                                        <th>Preço Unit.</th>
+                                        <th>Quantidade</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in itens %}
+                                    <tr>
+                                        <td>
+                                            {% if item.produto.imagem %}
+                                                <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}" 
+                                                     class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                     style="width: 60px; height: 60px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong>{{ item.produto.nome }}</strong>
+                                            <br>
+                                            <small class="text-muted">Ref: {{ item.produto.ref }}</small>
+                                            <br>
+                                            <small class="text-muted">{{ item.produto.descricao|truncatewords:8 }}</small>
+                                        </td>
+                                        <td>
+                                            <strong>R$ {{ item.produto.valor|floatformat:2 }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info fs-6">{{ item.quantidade }}x</span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">R$ {{ item.get_total|floatformat:2 }}</strong>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="4" class="text-end">Total do Pedido:</th>
+                                        <th>
+                                            <span class="h5 text-success">R$ {{ pedido.get_carrinho_total|floatformat:2 }}</span>
+                                        </th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">Nenhum item encontrado neste pedido</h6>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ações do Pedido -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>
+                        Ações do Pedido
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'dashboard:pedido_update' pedido.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit me-2"></i>
+                            Editar Pedido
+                        </a>
+                        
+                        <button type="button" class="btn btn-info toggle-status" 
+                                data-pedido-id="{{ pedido.id }}" 
+                                data-current-status="{{ pedido.completo|yesno:'true,false' }}">
+                            {% if pedido.completo %}
+                                <i class="fas fa-undo me-2"></i>
+                                Reabrir Pedido
+                            {% else %}
+                                <i class="fas fa-check me-2"></i>
+                                Finalizar Pedido
+                            {% endif %}
+                        </button>
+                        
+                        <a href="{% url 'dashboard:pedido_delete' pedido.id %}" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>
+                            Deletar Pedido
+                        </a>
+                        
+                        <a href="{% url 'dashboard:pedidos_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>
+                            Voltar à Lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Alternar status do pedido
+    document.querySelector('.toggle-status').addEventListener('click', function() {
+        const pedidoId = this.dataset.pedidoId;
+        const currentStatus = this.dataset.currentStatus === 'true';
+        
+        if (confirm(`Tem certeza que deseja ${currentStatus ? 'reabrir' : 'finalizar'} este pedido?`)) {
+            fetch(`/dashboard/pedidos/${pedidoId}/toggle-status/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erro ao alterar status do pedido');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                alert('Erro ao alterar status do pedido');
+            });
+        }
+    });
+</script>
+{% endblock %}

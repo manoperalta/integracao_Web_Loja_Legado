@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Editar Categoria</h1>
+    <p><strong>Código:</strong> {{ categoria.get_codigo }}</p>
+    <p><strong>Código Completo:</strong> {{ categoria.get_codigo_completo }}</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        <a href="{% url 'lista_categorias' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %}
+
+

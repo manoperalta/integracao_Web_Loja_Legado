@@ -1,0 +1,15 @@
+Detalhes do Pedido #13
+Data do Pedido: 2025-10-09 02:50:06.978561+00:00
+Cliente: x
+Status do Pagamento: pago
+Transaction ID: 1760034985.905935
+
+Produtos:
+  - ID: 2
+    Nome: Creatina Creapure
+    Descrição: A vantagem para quem compra é a de encontrar uma fabricante brasileira que vende direto para o consumidor.
+    Quantidade: 24
+    Preço Unitário: R$89.90
+    Total do Item: R$2157.60
+
+Total do Pedido: R$2157.60

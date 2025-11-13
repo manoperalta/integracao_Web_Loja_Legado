@@ -1,0 +1,120 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard - {{ title }}{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-shopping-cart me-2"></i>
+    {{ title }}
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'dashboard:pedidos_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>
+        Voltar
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{{ title }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.usuario.id_for_label }}" class="form-label">
+                                        <i class="fas fa-user me-1"></i>
+                                        {{ form.usuario.label }}
+                                    </label>
+                                    {{ form.usuario }}
+                                    {% if form.usuario.errors %}
+                                        <div class="text-danger small">{{ form.usuario.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.status_pagamento.id_for_label }}" class="form-label">
+                                        <i class="fas fa-credit-card me-1"></i>
+                                        {{ form.status_pagamento.label }}
+                                    </label>
+                                    {{ form.status_pagamento }}
+                                    {% if form.status_pagamento.errors %}
+                                        <div class="text-danger small">{{ form.status_pagamento.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.completo }}
+                                        <label class="form-check-label" for="{{ form.completo.id_for_label }}">
+                                            <i class="fas fa-check me-1"></i>
+                                            {{ form.completo.label }}
+                                        </label>
+                                    </div>
+                                    {% if form.completo.errors %}
+                                        <div class="text-danger small">{{ form.completo.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.transaction_id.id_for_label }}" class="form-label">
+                                        <i class="fas fa-barcode me-1"></i>
+                                        {{ form.transaction_id.label }}
+                                    </label>
+                                    {{ form.transaction_id }}
+                                    {% if form.transaction_id.errors %}
+                                        <div class="text-danger small">{{ form.transaction_id.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Este campo é preenchido automaticamente quando o pedido é finalizado.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if pedido %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Informações do Pedido:</strong><br>
+                                Data de criação: {{ pedido.data_pedido|date:"d/m/Y H:i" }}<br>
+                                Total de itens: {{ pedido.get_carrinho_itens }}<br>
+                                Valor total: R$ {{ pedido.get_carrinho_total|floatformat:2 }}
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dashboard:pedidos_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Salvar Alterações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Atualizar transaction_id automaticamente quando marcar como completo
+    document.getElementById('id_completo').addEventListener('change', function() {
+        const transactionField = document.getElementById('id_transaction_id');
+        if (this.checked && !transactionField.value) {
+            transactionField.value = Date.now();
+        }
+    });
+</script>
+{% endblock %}

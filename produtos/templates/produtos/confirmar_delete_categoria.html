@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Confirmar Exclusão</h1>
+    <p>Tem certeza que deseja deletar a categoria <strong>{{ categoria.get_codigo_completo }}</strong>?</p>
+    <p class="text-warning">Atenção: Os produtos associados a esta categoria terão o campo categoria definido como NULL.</p>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Sim, Deletar</button>
+        <a href="{% url 'lista_categorias' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+{% endblock %}
+
+

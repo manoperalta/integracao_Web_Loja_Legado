@@ -1,0 +1,238 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard - Pedidos{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-shopping-cart me-2"></i>
+    Gerenciar Pedidos
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Filtros de Pesquisa</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-2">
+                    {{ form.pedido_id.label_tag }}
+                    {{ form.pedido_id }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.data_inicio.label_tag }}
+                    {{ form.data_inicio }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.data_fim.label_tag }}
+                    {{ form.data_fim }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.status.label_tag }}
+                    {{ form.status }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.usuario.label_tag }}
+                    {{ form.usuario }}
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search me-1"></i>
+                        Filtrar
+                    </button>
+                    <a href="{% url 'dashboard:pedidos_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Lista de Pedidos</h5>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Data do Pedido</th>
+                                <th>Itens</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Pagamento</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pedido in page_obj %}
+                            <tr>
+                                <td><strong>#{{ pedido.id }}</strong></td>
+                                <td>
+                                    {% if pedido.usuario %}
+                                        <i class="fas fa-user me-1"></i>
+                                        {{ pedido.usuario.username }}
+                                    {% else %}
+                                        <i class="fas fa-user-slash me-1 text-muted"></i>
+                                        <span class="text-muted">Anônimo</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ pedido.data_pedido|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ pedido.get_carrinho_itens }} itens</span>
+                                </td>
+                                <td><strong>R$ {{ pedido.get_carrinho_total|floatformat:2 }}</strong></td>
+                                <td>
+                                    {% if pedido.completo %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>
+                                            Finalizado
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if pedido.status_pagamento == 'pago' %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-credit-card me-1"></i>
+                                            Pago
+                                        </span>
+                                    {% elif pedido.status_pagamento == 'cancelado' %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>
+                                            Cancelado
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-hourglass-half me-1"></i>
+                                            Pendente
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'dashboard:pedido_detail' pedido.id %}" 
+                                           class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'dashboard:pedido_update' pedido.id %}" 
+                                           class="btn btn-sm btn-outline-warning" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-info toggle-status" 
+                                                data-pedido-id="{{ pedido.id }}" 
+                                                data-current-status="{{ pedido.completo|yesno:'true,false' }}"
+                                                title="Alternar Status">
+                                            {% if pedido.completo %}
+                                                <i class="fas fa-undo"></i>
+                                            {% else %}
+                                                <i class="fas fa-check"></i>
+                                            {% endif %}
+                                        </button>
+                                        <a href="{% url 'dashboard:pedido_delete' pedido.id %}" 
+                                           class="btn btn-sm btn-outline-danger" title="Deletar">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum pedido encontrado</h5>
+                    <p class="text-muted">Tente ajustar os filtros de pesquisa</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Alternar status do pedido
+    document.querySelectorAll('.toggle-status').forEach(button => {
+        button.addEventListener('click', function() {
+            const pedidoId = this.dataset.pedidoId;
+            const currentStatus = this.dataset.currentStatus === 'true';
+            
+            if (confirm(`Tem certeza que deseja ${currentStatus ? 'reabrir' : 'finalizar'} este pedido?`)) {
+                fetch(`/dashboard/pedidos/${pedidoId}/toggle-status/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erro ao alterar status do pedido');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao alterar status do pedido');
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

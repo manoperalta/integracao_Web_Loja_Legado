@@ -1,0 +1,196 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard - {{ title }}{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-box me-2"></i>
+    {{ title }}
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'dashboard:produtos_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>
+        Voltar
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{{ title }}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.nome.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tag me-1"></i>
+                                        {{ form.nome.label }}
+                                    </label>
+                                    {{ form.nome }}
+                                    {% if form.nome.errors %}
+                                        <div class="text-danger small">{{ form.nome.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.descricao.id_for_label }}" class="form-label">
+                                        <i class="fas fa-align-left me-1"></i>
+                                        {{ form.descricao.label }}
+                                    </label>
+                                    {{ form.descricao }}
+                                    {% if form.descricao.errors %}
+                                        <div class="text-danger small">{{ form.descricao.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.ref.id_for_label }}" class="form-label">
+                                                <i class="fas fa-barcode me-1"></i>
+                                                {{ form.ref.label }}
+                                            </label>
+                                            {{ form.ref }}
+                                            {% if form.ref.errors %}
+                                                <div class="text-danger small">{{ form.ref.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.valor.id_for_label }}" class="form-label">
+                                                <i class="fas fa-dollar-sign me-1"></i>
+                                                {{ form.valor.label }}
+                                            </label>
+                                            {{ form.valor }}
+                                            {% if form.valor.errors %}
+                                                <div class="text-danger small">{{ form.valor.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.quantidade.id_for_label }}" class="form-label">
+                                        <i class="fas fa-boxes me-1"></i>
+                                        {{ form.quantidade.label }}
+                                    </label>
+                                    {{ form.quantidade }}
+                                    {% if form.quantidade.errors %}
+                                        <div class="text-danger small">{{ form.quantidade.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.unidade_de_medida.id_for_label }}" class="form-label">
+                                                <i class="fas fa-balance-scale me-1"></i>
+                                                {{ form.unidade_de_medida.label }}
+                                            </label>
+                                            {{ form.unidade_de_medida }}
+                                            {% if form.unidade_de_medida.errors %}
+                                                <div class="text-danger small">{{ form.unidade_de_medida.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.valor_da_medida.id_for_label }}" class="form-label">
+                                                <i class="fas fa-ruler me-1"></i>
+                                                {{ form.valor_da_medida.label }}
+                                            </label>
+                                            {{ form.valor_da_medida }}
+                                            {% if form.valor_da_medida.errors %}
+                                                <div class="text-danger small">{{ form.valor_da_medida.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.categoria.id_for_label }}" class="form-label">
+                                        <i class="fas fa-folder me-1"></i>
+                                        {{ form.categoria.label }}
+                                    </label>
+                                    {{ form.categoria }}
+                                    {% if form.categoria.errors %}
+                                        <div class="text-danger small">{{ form.categoria.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.imagem.id_for_label }}" class="form-label">
+                                        <i class="fas fa-image me-1"></i>
+                                        {{ form.imagem.label }}
+                                    </label>
+                                    
+                                    {% if produto and produto.imagem %}
+                                        <div class="mb-2">
+                                            <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" 
+                                                 class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                                            <div class="small text-muted mt-1">Imagem atual</div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {{ form.imagem }}
+                                    {% if form.imagem.errors %}
+                                        <div class="text-danger small">{{ form.imagem.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 5MB
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'dashboard:produtos_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                {% if produto %}Atualizar{% else %}Criar{% endif %} Produto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview da imagem
+    document.getElementById('id_imagem').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Criar ou atualizar preview da imagem
+                let preview = document.getElementById('image-preview');
+                if (!preview) {
+                    preview = document.createElement('img');
+                    preview.id = 'image-preview';
+                    preview.className = 'img-thumbnail mt-2';
+                    preview.style.maxWidth = '200px';
+                    preview.style.maxHeight = '200px';
+                    e.target.parentNode.appendChild(preview);
+                }
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

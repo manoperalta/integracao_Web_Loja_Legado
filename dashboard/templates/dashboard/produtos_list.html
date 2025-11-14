@@ -1,0 +1,177 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Dashboard - Produtos{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-box me-2"></i>
+    Gerenciar Produtos
+{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'import:wizard_inicio' %}" class="btn btn-success me-2">
+        <i class="fas fa-download me-2"></i>
+        Importar FTP
+    </a>
+    <a href="{% url 'dashboard:produto_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>
+        Novo Produto
+    </a>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="card-title mb-0">Lista de Produtos</h5>
+                </div>
+                <div class="col-auto">
+                    <form method="GET" class="d-flex">
+                        <input type="text" name="search" class="form-control me-2" 
+                               placeholder="Buscar produtos..." value="{{ search }}">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 80px;">Imagem</th>
+                                <th>Nome</th>
+                                <th>Referência</th>
+                                <th>Preço</th>
+                                <th>Medida</th>
+                                <th>Estoque</th>
+                                <th>Criado por</th>
+                                <th>Data</th>
+                                <th style="width: 150px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produto in page_obj %}
+                            <tr>
+                                <td>
+                                    {% if produto.imagem %}
+                                        <img src="{{ produto.imagem.url }}" alt="{{ produto.nome }}" 
+                                             class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="width: 60px; height: 60px;">
+                                            <i class="fas fa-image text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ produto.nome }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ produto.descricao|truncatewords:8 }}</small>
+                                </td>
+                                <td>{{ produto.ref }}</td>
+                                <td><strong>R$ {{ produto.valor|floatformat:2 }}</strong></td>
+                                <td>{{ produto.valor_da_medida|floatformat:2 }} {{ produto.get_unidade_de_medida_display }}</td>
+                                <td>
+                                    {% if produto.quantidade <= 5 %}
+                                        <span class="badge bg-danger">{{ produto.quantidade }}</span>
+                                    {% elif produto.quantidade <= 10 %}
+                                        <span class="badge bg-warning">{{ produto.quantidade }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ produto.quantidade }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ produto.usuario.username }}</td>
+                                <td>{{ produto.data_criacao|date:"d/m/Y" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'dashboard:produto_update' produto.id %}" 
+                                           class="btn btn-sm btn-outline-primary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'dashboard:produto_delete' produto.id %}" 
+                                           class="btn btn-sm btn-outline-danger" title="Deletar">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                {% if page_obj.has_other_pages %}
+                    <nav aria-label="Navegação de páginas">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nenhum produto encontrado</h5>
+                    {% if search %}
+                        <p class="text-muted">Tente uma busca diferente ou 
+                            <a href="{% url 'dashboard:produtos_list' %}">veja todos os produtos</a>
+                        </p>
+                    {% else %}
+                        <p class="text-muted">Comece criando seu primeiro produto!</p>
+                        <a href="{% url 'dashboard:produto_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Criar Primeiro Produto
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Script removido - funcionalidade de importação FTP movida para /import/
+</script>
+{% endblock %}

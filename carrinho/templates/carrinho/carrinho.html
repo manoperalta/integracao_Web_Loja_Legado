@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Carrinho de Compras</h1>
+
+    {% if itens %}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box-element">
+                <a class="btn btn-outline-dark mb-3" href="{% url 'home' %}">&#x2190; Continuar Comprando</a>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <h5>Itens: <strong id="carrinho-itens">{{ pedido.get_carrinho_itens }}</strong></h5>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Total: <strong id="carrinho-total">R${{ pedido.get_carrinho_total|floatformat:2 }}</strong></h5>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        {% if user.is_authenticated %}
+                        <a class="btn btn-primary me-2" href="{% url 'fechar_pedido' %}">Fechar Pedido</a>
+                        {% else %}
+                        <p class="text-muted small">Faça login para finalizar o pedido</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-element mt-3">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 100px;">Imagem</th>
+                                <th>Produto</th>
+                                <th style="width: 120px;">Preço Unit.</th>
+                                <th style="width: 150px;">Quantidade</th>
+                                <th style="width: 120px;">Total</th>
+                                <th style="width: 100px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in itens %}
+                            <tr>
+                                <td>
+                                    <img src="{{ item.produto.imagem.url }}" alt="{{ item.produto.nome }}"
+                                        class="img-thumbnail"
+                                        style="width: 80px; height: 80px; object-fit: cover;">
+                                </td>
+                                <td>
+                                    <h6 class="mb-1">{{ item.produto.nome }}</h6>
+                                    <small class="text-muted">{{ item.produto.descricao|truncatewords:10 }}</small><br>
+                                    <small class="text-muted">{{ item.produto.valor_da_medida|floatformat:2 }} {{ item.produto.get_unidade_de_medida_display }}</small>
+                                </td>
+                                <td>
+                                    <strong>R${{ item.produto.valor|floatformat:2 }}</strong>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <button class="btn btn-outline-secondary btn-sm me-2 update-cart"
+                                            data-product="{{ item.produto.id }}" data-action="remove">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <span class="mx-2 quantidade"><strong>{{ item.quantidade }}</strong></span>
+                                        <button class="btn btn-outline-secondary btn-sm ms-2 update-cart"
+                                            data-product="{{ item.produto.id }}" data-action="add">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-success subtotal">R${{ item.get_total|floatformat:2 }}</strong>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline-danger btn-sm update-cart"
+                                        data-product="{{ item.produto.id }}" data-action="delete"
+                                        title="Remover item">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <a class="btn btn-outline-primary" href="{% url 'home' %}">Continuar Comprando</a>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Resumo do Pedido</h5>
+                                <p class="card-text">
+            <strong>Total de Itens:</strong>
+            <span id="resumo-itens">{{ pedido.get_carrinho_itens }}</span><br>
+            <strong>Valor Total:</strong>
+            <span class="text-success fs-4" id="resumo-total">
+                R${{ pedido.get_carrinho_total|floatformat:2 }}
+            </span>
+        </p>
+                                {% if user.is_authenticated %}
+                                <a href="{% url 'fechar_pedido' %}" class="btn btn-primary btn-lg w-100">
+                                    Finalizar Pedido
+                                </a>
+                                {% else %}
+                                <p class="text-muted text-center">
+                                    <a href="{% url 'login' %}" class="btn btn-outline-primary">Faça login</a>
+                                    para finalizar o pedido
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="box-element">
+            <h3 class="text-muted">Seu carrinho está vazio</h3>
+            <p class="text-muted">Adicione alguns produtos para começar suas compras!</p>
+            <a href="{% url 'home' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-bag me-2"></i>Começar a Comprar
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Font Awesome -->
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Captura todos os botões de adicionar/remover item
+    document.querySelectorAll('.update-cart').forEach(button => {
+        button.addEventListener('click', function () {
+            const productId = this.dataset.product;
+            const action = this.dataset.action;
+            const row = this.closest('tr');
+
+            // Envia via AJAX
+            fetch("{% url 'atualizar_item' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: new URLSearchParams({
+                    'productId': productId,
+                    'action': action
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Resposta:', data);
+
+                // Se o item foi removido completamente, apaga a linha
+                if (data.quantidade <= 0) {
+                    row.remove();
+                } else {
+                    // Atualiza a quantidade e total da linha
+                    const quantidadeElemento = row.querySelector('span strong');
+                    const totalItemElemento = row.querySelector('td:nth-child(5) strong');
+
+                    if (quantidadeElemento) quantidadeElemento.textContent = data.quantidade;
+                    if (totalItemElemento) totalItemElemento.textContent = `R$${data.item_total.toFixed(2)}`;
+                }
+
+                // Atualiza os totais principais
+                atualizarTotaisCarrinho(data);
+            })
+            .catch(error => console.error('Erro:', error));
+        });
+    });
+
+    // Atualiza totais no resumo e no topo
+    function atualizarTotaisCarrinho(data) {
+        // Topo da página
+        const itensTopo = document.querySelectorAll('h5 strong')[0];
+        const totalTopo = document.querySelectorAll('h5 strong')[1];
+        if (itensTopo) itensTopo.textContent = data.carrinho_itens;
+        if (totalTopo) totalTopo.textContent = `R$${data.carrinho_total.toFixed(2)}`;
+
+        // Card lateral "Resumo do Pedido"
+        const resumoItens = document.getElementById('resumo-itens');
+        const resumoTotal = document.getElementById('resumo-total');
+        if (resumoItens) resumoItens.textContent = data.carrinho_itens;
+        if (resumoTotal) resumoTotal.textContent = `R$${data.carrinho_total.toFixed(2)}`;
+    }
+
+    // Função para pegar o CSRF token do cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
+
+
+{% endblock content %}
+

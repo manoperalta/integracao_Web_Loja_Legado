@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Lista de Produtos</h2>
+            <a href="{% url 'criar_produto' %}" class="btn btn-light">
+                <i class="bi bi-plus-circle"></i> Adicionar Novo Produto
+            </a>
+        </div>
+        <div class="card-body">
+            {% if produtos %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Ref</th>
+                                <th>Nome</th>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Unidade</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produto in produtos %}
+                            <tr>
+                                <td>{{ produto.ref|default:"-" }}</td>
+                                <td>
+                                    <strong>{{ produto.nome }}</strong>
+                                    {% if produto.descricao %}
+                                        <br><small class="text-muted">{{ produto.descricao|truncatewords:10 }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if produto.categoria %}
+                                        <span class="badge bg-info">{{ produto.categoria.nome }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ produto.quantidade }}</td>
+                                <td>{{ produto.get_unidade_de_medida_display }}</td>
+                                <td>R$ {{ produto.valor }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{% url 'editar_produto' produto.pk %}" class="btn btn-warning" title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'deletar_produto' produto.pk %}" class="btn btn-danger" title="Deletar">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> Nenhum produto cadastrado.
+                    <br>
+                    <a href="{% url 'criar_produto' %}" class="btn btn-primary mt-2">Cadastrar Primeiro Produto</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
